@@ -14,10 +14,11 @@ class PurchaseController extends Controller
     public function actionIndex()
     {
         print "running purchase parser...\n";
+        Yii::warning("running purchase parser...\n");
         $last_run = Settings::get('last_parser_run');
         $current_run = time();
         $datetime = date('d.m.Y%20H:i:s', $last_run);
-        $itemLimit = 50;
+        $itemLimit = 70;
         $ch = curl_init();
 
         $endpointUrl = 'https://old.zakupki.mos.ru/api/Cssp/Purchase/Query?';
@@ -49,7 +50,10 @@ class PurchaseController extends Controller
                 $endDate = explode(' ', $item['endDate'])[0];
                 $isOneDay=$beginDate==$endDate;
                 $isNotInRegions=!in_array($item['regionName'], $excludeRegions);
-                if (/*$item['needId'] and $isOneDay and $isNotInRegions and*/ !$exists) {
+                if($exists)
+                    break;
+                if ($item['needId'] and $isOneDay and $isNotInRegions) {
+                    print "{$beginDate} - {$endDate}\n";
                     $detailUrl = self::getDetailUrl($item);
                     curl_setopt($ch, CURLOPT_URL, $detailUrl);
                     $itemDetails = curl_exec($ch);
@@ -89,8 +93,6 @@ class PurchaseController extends Controller
                     $purchase->is_notified = false;
                     $purchase->save();
                     $newPurchases[] = $purchase;
-                } else {
-                    break;
                 }
             }
         }
@@ -111,6 +113,7 @@ class PurchaseController extends Controller
         }
         Settings::set('last_parser_run', $current_run);
         print count($newPurchases) . " new purchases\n";
+        Yii::warning(count($newPurchases) . " new purchases\n");
     }
 
     private static function getDetailUrl($item)
