@@ -14,5 +14,13 @@ return [
             'timeZone' => 'Europe/Moscow',
             'dateFormat' => 'php:H:i d.m.Y'
         ],
+        'log' => [
+            'targets' => [
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['error', 'warning'],
+                ],
+            ]
+        ]
     ],
 ];
