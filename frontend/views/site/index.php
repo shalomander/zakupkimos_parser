@@ -55,9 +55,28 @@ $this->title = 'Активные закупки';
                         return ['class' => 'name'];
                     },
                     'content' => function ($data) {
+                        $urlType = $data->auction_id ? 'auction' : ($data->need_id ? 'need' : 'tenders');
+                        $urlId = $data->auction_id ?: $data->need_id ?: $data->tender_id;
+                        switch ($urlType) {
+                            case 'auction':
+                                $prefix = '';
+                                $title = 'Котировочная сессия';
+                                break;
+                            case 'need':
+                                $title = 'Закупка по потребности';
+                                $prefix = 'old.';
+                                $urlType = '#/' . $urlType;
+                                break;
+                            case 'tenders':
+                                $title = 'Конкурентная процедура';
+                                $prefix = 'old.';
+                                $urlType = '#/' . $urlType;
+                                break;
+                        }
                         return Html::a("#" . $data->number,
-                            'https://old.zakupki.mos.ru/#/need/' . $data->number,
-                            ['target' => '_blank']);
+                            "https://{$prefix}zakupki.mos.ru/{$urlType}/{$urlId}",
+                            ['target' => '_blank',
+                            'title'=>$title]);
                     }
                 ],
                 [
@@ -87,7 +106,7 @@ $this->title = 'Активные закупки';
                     'label' => 'Время окончания закупки',
                     'content' => function ($data) {
                         $remainingTime = $data->end_date - time();
-                        $content = '<p>' . date('H:i d.m.Y', $data->end_date) . "</p><p>";
+                        $content = '<p>' . Yii::$app->formatter->asDate($data->end_date) . "</p><p>";
                         if ($remainingTime <= 0) {
                             $content .= '(завершена)';
                         } else if ($remainingTime <= 60) {
@@ -100,7 +119,7 @@ $this->title = 'Активные закупки';
                             $content .= $remainingMinutes . 'мин)';
                         }
                         $content .= '</p>';
-                        $content .= $data->end_date.'<br>'.time().'<br>'.$remainingTime;
+//                        $content .= $data->end_date.'<br>'.time().'<br>'.$remainingTime;
                         return $content;
                     }
                 ],

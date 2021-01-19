@@ -34,8 +34,27 @@ $this->registerCss("
     <?php foreach ($newPurchases as $purchase): ?>
         <tr>
             <td>
-                <a href="https://old.zakupki.mos.ru/#/need/<?= $purchase->number ?>">
-                    #<?= $purchase->number ?>
+                <?php
+                $urlType = $purchase->auction_id ? 'auction' : ($purchase->need_id ? 'need' : 'tenders');
+                $urlId = $purchase->auction_id ?: $purchase->need_id ?: $purchase->tender_id;
+                $prefix = 'old.';
+                switch ($urlType) {
+                    case 'auction':
+                        $prefix = '';
+                        $title = 'Котировочная сессия';
+                        break;
+                    case 'need':
+                        $title = 'Закупка по потребности';
+                        $urlType = '#/' . $urlType;
+                        break;
+                    case 'tenders':
+                        $title = 'Конкурентная процедура';
+                        $urlType = '#/' . $urlType;
+                        break;
+                }
+                ?>
+                <a href="https://<?=$prefix?>zakupki.mos.ru/<?=$urlType?>/<?= $urlId ?>" title="<?=$title?>">
+                    #<?= $urlId ?>
                 </a>
             </td>
             <td><?= $purchase->purchase_creator_name ?></td>

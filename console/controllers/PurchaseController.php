@@ -2,9 +2,10 @@
 
 namespace console\controllers;
 
-use Codeception\PHPUnit\ResultPrinter\HTML;
 use common\models\PurchaseList;
 use common\models\Settings;
+use \DateTimeZone;
+use \DateTime;
 use Yii;
 use yii\console\Controller;
 
@@ -16,7 +17,7 @@ class PurchaseController extends Controller
         $last_run = Settings::get('last_parser_run');
         $current_run = time();
         $datetime = date('d.m.Y%20H:i:s', $last_run);
-        $itemLimit = 20;
+        $itemLimit = 50;
         $ch = curl_init();
 
         $endpointUrl = 'https://old.zakupki.mos.ru/api/Cssp/Purchase/Query?';
@@ -26,13 +27,12 @@ class PurchaseController extends Controller
         $endpointUrl .= '"tenderSpecificFilter":{"stateIdIn":[5]}},"order":[{"field":"PublishDate","desc":true}],"withCount":true,"take":';
         $endpointUrl .= $itemLimit; //limit
         $endpointUrl .= ',"skip":0}';
-        print $endpointUrl."\n";
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_URL, $endpointUrl);
         $response = curl_exec($ch);
         if (curl_error($ch)) {
-            var_dump(curl_error($ch));
+            Yii::error(curl_error($ch));
         } else {
             $data = json_decode($response, true);
             $excludeRegions = [
@@ -42,13 +42,15 @@ class PurchaseController extends Controller
                 "обл Ленинградская",
             ];
             $newPurchases = [];
+            $timezone=new DateTimeZone('Europe/Moscow');
             foreach ($data['items'] as $item) {
-                print $item['number']."\n";
                 $exists = PurchaseList::find()->where(['purchase_id' => $item['id']])->exists();
                 $beginDate = explode(' ', $item['beginDate'])[0];
                 $endDate = explode(' ', $item['endDate'])[0];
-                if (/*$beginDate==$endDate and !in_array($item['regionName'], $excludeRegions) and*/ !$exists) {
-                    $detailUrl = 'https://old.zakupki.mos.ru/api/Cssp/Need/GetEntity?id=' . $item['number'];
+                $isOneDay=$beginDate==$endDate;
+                $isNotInRegions=!in_array($item['regionName'], $excludeRegions);
+                if (/*$item['needId'] and $isOneDay and $isNotInRegions and*/ !$exists) {
+                    $detailUrl = self::getDetailUrl($item);
                     curl_setopt($ch, CURLOPT_URL, $detailUrl);
                     $itemDetails = curl_exec($ch);
 
@@ -73,19 +75,19 @@ class PurchaseController extends Controller
                     $purchase->offer_count = $item['offerCount'];
                     $purchase->auction_current_price = $item['auctionCurrentPrice'];
                     $purchase->auction_next_price = $item['auctionNextPrice'];
-                    $purchase->begin_date = strtotime($item['beginDate']);
-                    $purchase->end_date = strtotime($item['endDate']);
+                    $purchase->begin_date = (new DateTime($item['beginDate'], $timezone))->format('U');
+                    $purchase->end_date = (new DateTime($item['endDate'], $timezone))->format('U');
                     $purchase->federal_law_name = $item['federalLawName'];
                     $purchase->region_path = $item['regionPath'];
                     $purchase->is_external_integration = $item['isExternalIntegration'];
                     $purchase->purchase_id = $item['id'];
                     if (!curl_error($ch)) {
-                        $itemDetailsArray=json_decode($itemDetails, true);
-                        if(array_key_exists('deliveryPlace', $itemDetailsArray))
+                        $itemDetailsArray = json_decode($itemDetails, true);
+                        if (array_key_exists('deliveryPlace', $itemDetailsArray))
                             $purchase->delivery_place = $itemDetailsArray['deliveryPlace'];
                     }
                     $purchase->is_notified = false;
-                    //$purchase->save();
+                    $purchase->save();
                     $newPurchases[] = $purchase;
                 } else {
                     break;
@@ -94,7 +96,7 @@ class PurchaseController extends Controller
         }
         curl_close($ch);
         $email = Settings::get('notification_email', null);
-        if ($email and !empty($newPurchases) and false) {
+        if ($email and !empty($newPurchases)) {
             $sent = Yii::$app->mailer->compose('parser', ['newPurchases' => $newPurchases])
                 ->setFrom(Yii::$app->params['smtpEmail'])
                 ->setTo($email)
@@ -108,6 +110,22 @@ class PurchaseController extends Controller
             }
         }
         Settings::set('last_parser_run', $current_run);
-        print count($newPurchases)." new purchases\n";
+        print count($newPurchases) . " new purchases\n";
+    }
+
+    private static function getDetailUrl($item)
+    {
+        $itemType = $item['auctionId'] ? 'auction' : ($item['needId'] ? 'need' : 'tender');
+        switch ($itemType) {
+            case 'auction':
+                $detailUrl = 'https://zakupki.mos.ru/newapi/api/Auction/Get?auctionId=' . $item['auctionId'];
+                break;
+            case 'need':
+                $detailUrl = 'https://old.zakupki.mos.ru/api/Cssp/Need/GetEntity?id=' . $item['needId'];
+                break;
+            case 'tender':
+                $detailUrl = 'https://old.zakupki.mos.ru/api/Cssp/Tender/GetEntity?id=' . $item['tenderId'];
+        }
+        return $detailUrl;
     }
 }
