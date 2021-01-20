@@ -131,4 +131,8 @@ class PurchaseController extends Controller
         }
         return $detailUrl;
     }
+
+    public function actionRemoveOld($storePeriod=365*86400){
+        PurchaseList::deleteAll(['<=', 'end_date', time()-$storePeriod]);
+    }
 }
