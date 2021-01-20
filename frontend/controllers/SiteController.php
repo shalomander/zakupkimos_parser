@@ -35,12 +35,12 @@ class SiteController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['login', 'signup'],
+                        'actions' => ['login'/*, 'signup'*/],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'config'],
+                        'actions' => ['login', 'index', 'logout', 'config'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -82,14 +82,10 @@ class SiteController extends Controller
             'query' => PurchaseList::find()
                 ->where(['>=', 'begin_date', strtotime('today', time())]),
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => 100,
             ],
         ]);
-        $settings = [
-            'notification_email' => Settings::get('notification_email', Yii::$app->user->identity->email),
-            'silent_from' => Settings::get('silent_from', '0:00'),
-            'silent_till' => Settings::get('silent_till', '0:00')
-        ];
+        $settings=Settings::getAsArray(['notification_email'=>Yii::$app->user->identity->email]);
         return $this->render('index', ['purchaseDataProvider' => $purchaseDataProvider,
             'settings' => $settings]);
     }
@@ -252,7 +248,7 @@ class SiteController extends Controller
         $settings=Yii::$app->request->post();
         unset($settings['_csrf-frontend']);
         foreach ($settings as $k=>$v){
-            Settings::set($k, $v);
+            Settings::set($k, $v, false);
         }
         return json_encode($settings);
     }

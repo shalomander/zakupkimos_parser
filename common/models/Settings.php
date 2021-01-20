@@ -46,4 +46,13 @@ class Settings extends ActiveRecord
         $item->value = $value;
         return $item->save();
     }
+
+    public static function getAsArray($defaults){
+        $settings=static::find()->all();
+        $result=$defaults;
+        foreach ($settings as $item) {
+            $result[$item['key']]=$item['value'];
+        }
+        return $result;
+    }
 }

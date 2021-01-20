@@ -122,6 +122,18 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+.table-gridview td{
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.table-gridview.hide_column-4 th:nth-child(4),.table-gridview.hide_column-4 td:nth-child(4) {
+    display: none;
+}
+
+.table-gridview.hide_column-6 th:nth-child(6),.table-gridview.hide_column-6 td:nth-child(6) {
+    display: none;
+}
 
 .table-gridview th, .table-gridview td {
     white-space: normal;
@@ -147,3 +159,4 @@ tr.purchase-closed > td:last-child {
 .container > .row {
     margin-bottom: 2rem;
 }
+

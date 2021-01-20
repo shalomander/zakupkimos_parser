@@ -7,30 +7,85 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 
 $this->title = 'Активные закупки';
+$gridViewTableClasses='';
+$gridViewTableClasses.=(isset($settings['hide_column-4']) and $settings['hide_column-4'] == 'true')?' hide_column-4':'';
+$gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_column-6'] == 'true')?' hide_column-6':'';
 ?>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         setInterval(function () {
             $.pjax.reload({container: '#purchases', async: false});
-        }, 30000);
-        document.querySelectorAll('.input-settings').forEach(el => el.addEventListener('blur', event => {
-            if (el.checkValidity()) {
-                let request = new XMLHttpRequest();
-                request.open('POST', '/config', true);
-                let formData = new FormData()
-                formData.append('<?= Yii::$app->request->csrfParam; ?>', '<?= Yii::$app->request->csrfToken; ?>')
-                formData.append(el.name, el.value)
-                request.send(formData);
-            } else
-                console.log(el.reportValidity())
-        }));
+        }, 10000);
+        //document.querySelectorAll('.input-settings').forEach(el => el.addEventListener('blur, ', event => {
+        //    if (el.checkValidity()) {
+        //        let request = new XMLHttpRequest();
+        //        request.open('POST', '/config', true);
+        //        let formData = new FormData()
+        //        formData.append('<?//= Yii::$app->request->csrfParam; ?>//', '<?//= Yii::$app->request->csrfToken; ?>//')
+        //        formData.append(el.name, el.value)
+        //        request.send(formData);
+        //    } else
+        //        console.log(el.reportValidity())
+        //}));
+        document.querySelectorAll('.input-settings').forEach(el => el.addEventListener('change', event => {
+            setConfig(event)
+        }))
+        document.querySelectorAll('.column-control').forEach(el => el.addEventListener('change', event => {
+            toggleColumn(event)
+        }))
     })
+
+    function setConfig(e) {
+        let el = e.target;
+        if (el.checkValidity()) {
+            let request = new XMLHttpRequest();
+            request.open('POST', '/config', true);
+            let formData = new FormData()
+            formData.append('<?= Yii::$app->request->csrfParam; ?>', '<?= Yii::$app->request->csrfToken; ?>')
+            if (el.type == "checkbox")
+                formData.append(el.name, el.checked)
+            else
+                formData.append(el.name, el.value)
+            request.send(formData);
+        } else
+            console.log(el.reportValidity())
+    }
+
+    function toggleColumn(e){
+        let el = e.target;
+        let col=el.dataset.column;
+        let gridViewTables=document.querySelectorAll('.table-gridview');
+        gridViewTables.forEach(el=>el.classList.toggle('hide_column-'+col))
+        console.log(col)
+    }
 </script>
 <div class="row form-inline">
-    <div class="col-md-12 form-group ">
-        <label for="email1">Email для уведомлений:</label>
-        <input name="notification_email" type="email" class="form-control input-settings"
-               id="email1" value="<?= $settings['notification_email'] ?>" required>
+    <div class="col-md-6 form-group ">
+        <div>
+            Email для уведомлений:
+        </div>
+        <div>
+            <input name="notification_email" type="email" class="form-control input-settings"
+                   id="email1" value="<?= $settings['notification_email'] ?>" required>
+        </div>
+    </div>
+    <div class="col-md-6 form-group ">
+        <div>
+            Скрыть столбцы:
+        </div>
+        <div>
+            <input name="hide_column-4" type="checkbox" class="form-control input-settings column-control"
+                   id="checkbox1" data-column="4"
+                <?= (isset($settings['hide_column-4']) and $settings['hide_column-4'] == 'true') ? 'checked' : '' ?>>
+            <label for="checkbox1">Наименование</label>
+        </div>
+        <div>
+            <input name="hide_column-6" type="checkbox" class="form-control input-settings column-control"
+                   id="checkbox2" data-column="6"
+                <?= (isset($settings['hide_column-6']) and $settings['hide_column-6'] == 'true') ? 'checked' : '' ?>>
+            <label for="checkbox2">Адрес поставки</label>
+        </div>
+
     </div>
     <!--div class="col-md-6 form-group">
         <label for="time1">Не отправлять уведомления с </label>
@@ -48,6 +103,7 @@ $this->title = 'Активные закупки';
         <?= GridView::widget([
             'dataProvider' => $purchaseDataProvider,
             'columns' => [
+                'id',
                 [
                     'attribute' => 'number',
                     'label' => '№',
@@ -76,7 +132,7 @@ $this->title = 'Активные закупки';
                         return Html::a("#" . $data->number,
                             "https://{$prefix}zakupki.mos.ru/{$urlType}/{$urlId}",
                             ['target' => '_blank',
-                            'title'=>$title]);
+                                'title' => $title]);
                     }
                 ],
                 [
@@ -119,13 +175,13 @@ $this->title = 'Активные закупки';
                             $content .= $remainingMinutes . 'мин)';
                         }
                         $content .= '</p>';
-//                        $content .= $data->end_date.'<br>'.time().'<br>'.$remainingTime;
+//                      $content .= $data->end_date.'<br>'.time().'<br>'.$remainingTime;
                         return $content;
                     }
                 ],
             ],
             'tableOptions' => [
-                'class' => 'table table-striped table-bordered table-gridview'
+                'class' => 'table table-striped table-bordered table-gridview'.$gridViewTableClasses
             ],
             'rowOptions' => function ($data) {
                 if ($data->end_date - time() < 0) {
