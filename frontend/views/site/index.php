@@ -74,10 +74,10 @@ $gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_co
             Скрыть столбцы:
         </div>
         <div>
-            <input name="hide_column-4" type="checkbox" class="form-control input-settings column-control"
-                   id="checkbox1" data-column="4"
-                <?= (isset($settings['hide_column-4']) and $settings['hide_column-4'] == 'true') ? 'checked' : '' ?>>
-            <label for="checkbox1">Наименование</label>
+            <input name="hide_column-3" type="checkbox" class="form-control input-settings column-control"
+                   id="checkbox1" data-column="3"
+                <?= (isset($settings['hide_column-3']) and $settings['hide_column-3'] == 'true') ? 'checked' : '' ?>>
+            <label for="checkbox1">Заказчик</label>
         </div>
         <div>
             <input name="hide_column-6" type="checkbox" class="form-control input-settings column-control"

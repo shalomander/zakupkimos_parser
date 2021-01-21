@@ -127,7 +127,23 @@ a.desc:after {
     font-family: monospace;
 }
 
+.table-gridview.hide_column-1 th:nth-child(1),.table-gridview.hide_column-1 td:nth-child(1) {
+    display: none;
+}
+
+.table-gridview.hide_column-2 th:nth-child(2),.table-gridview.hide_column-2 td:nth-child(2) {
+    display: none;
+}
+
+.table-gridview.hide_column-3 th:nth-child(3),.table-gridview.hide_column-3 td:nth-child(3) {
+    display: none;
+}
+
 .table-gridview.hide_column-4 th:nth-child(4),.table-gridview.hide_column-4 td:nth-child(4) {
+    display: none;
+}
+
+.table-gridview.hide_column-5 th:nth-child(5),.table-gridview.hide_column-5 td:nth-child(5) {
     display: none;
 }
 
