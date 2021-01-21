@@ -55,6 +55,13 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
         formData.append(el.name, el.value)
         formData.append('id', el.dataset.id)
         request.send(formData);
+        if (el.value > 1) {
+            el.classList.add('status-viewed')
+            el.classList.remove('status-not_viewed')
+        } else {
+            el.classList.add('status-not_viewed')
+            el.classList.remove('status-viewed')
+        }
     }
 
     function toggleColumn(e) {
@@ -112,14 +119,23 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
                 [
                     'attribute' => 'status_id',
                     'label' => 'Статус',
+                    'contentOptions' => function ($model, $key, $index, $column) {
+                        return ['class' => 'va-middle text-center'];
+                    },
                     'content' => function ($data) {
+
+//                        $html = '<div class="form-check text-center">';
+//                        $html.=Html::checkbox('status_id', false, ['class'=>'form-check-input']);
+//                        $html.='</div>';
+//                        return $html;
                         $statuses = Status::find()->asArray()->all();
+                        $statusColorClass = ($data->status_id > 1) ? 'status-viewed' : 'status-not_viewed';
                         return Html::dropDownList('status_id',
                             $data->status_id,
                             ArrayHelper::map($statuses, 'id', 'name'),
                             [
                                 'data-id' => $data->id,
-                                'class' => 'input-status'
+                                'class' => 'input-status form-control ' . $statusColorClass
                             ]
                         );
                     }
