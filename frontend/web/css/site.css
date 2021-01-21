@@ -1,6 +1,7 @@
 html,
 body {
     height: 100%;
+    font-family: "Helvetica Neue";
 }
 
 .wrap {
@@ -123,8 +124,7 @@ a.desc:after {
     outline: none;
 }
 .table-gridview td{
-    font-size: 12px;
-    font-family: monospace;
+    font-size: 13px;
 }
 
 .table-gridview.hide_column-1 th:nth-child(1),.table-gridview.hide_column-1 td:nth-child(1) {

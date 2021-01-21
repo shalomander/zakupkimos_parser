@@ -3,14 +3,11 @@
 namespace console\controllers;
 
 use common\models\Settings;
-use common\models\User;
-use common\models\UserPlan;
 use yii\console\Controller;
-use common\models\Plan;
 
 class SeedSettingsController extends Controller
 {
-    public function actionIndex($notificationEmail = 'demo@admin.com', $from='23:00', $till='7:00')
+    public function actionIndex($notificationEmail = 'demo@admin.com', $from = '23:00', $till = '7:00')
     {
         $row = new Settings();
         $row->key = 'notification_email';

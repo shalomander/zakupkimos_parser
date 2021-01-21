@@ -2,33 +2,28 @@
 
 /* @var $this yii\web\View */
 
+use common\models\Status;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
 $this->title = 'Активные закупки';
-$gridViewTableClasses='';
-$gridViewTableClasses.=(isset($settings['hide_column-3']) and $settings['hide_column-3'] == 'true')?' hide_column-3':'';
-$gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_column-6'] == 'true')?' hide_column-6':'';
+$gridViewTableClasses = '';
+$gridViewTableClasses .= (isset($settings['hide_column-3']) and $settings['hide_column-3'] == 'true') ? ' hide_column-3' : '';
+$gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_column-6'] == 'true') ? ' hide_column-6' : '';
 ?>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         setInterval(function () {
             $.pjax.reload({container: '#purchases', async: false});
-        }, 10000);
-        //document.querySelectorAll('.input-settings').forEach(el => el.addEventListener('blur, ', event => {
-        //    if (el.checkValidity()) {
-        //        let request = new XMLHttpRequest();
-        //        request.open('POST', '/config', true);
-        //        let formData = new FormData()
-        //        formData.append('<?//= Yii::$app->request->csrfParam; ?>//', '<?//= Yii::$app->request->csrfToken; ?>//')
-        //        formData.append(el.name, el.value)
-        //        request.send(formData);
-        //    } else
-        //        console.log(el.reportValidity())
-        //}));
+        }, 20000);
         document.querySelectorAll('.input-settings').forEach(el => el.addEventListener('change', event => {
             setConfig(event)
+        }))
+        document.querySelectorAll('.gridview').forEach(el => el.addEventListener('change', event => {
+            if (event.target.classList.contains('input-status'))
+                setStatus(event)
         }))
         document.querySelectorAll('.column-control').forEach(el => el.addEventListener('change', event => {
             toggleColumn(event)
@@ -51,11 +46,22 @@ $gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_co
             console.log(el.reportValidity())
     }
 
-    function toggleColumn(e){
+    function setStatus(e) {
         let el = e.target;
-        let col=el.dataset.column;
-        let gridViewTables=document.querySelectorAll('.table-gridview');
-        gridViewTables.forEach(el=>el.classList.toggle('hide_column-'+col))
+        let request = new XMLHttpRequest();
+        request.open('POST', 'status', true);
+        let formData = new FormData()
+        formData.append('<?= Yii::$app->request->csrfParam; ?>', '<?= Yii::$app->request->csrfToken; ?>')
+        formData.append(el.name, el.value)
+        formData.append('id', el.dataset.id)
+        request.send(formData);
+    }
+
+    function toggleColumn(e) {
+        let el = e.target;
+        let col = el.dataset.column;
+        let gridViewTables = document.querySelectorAll('.table-gridview');
+        gridViewTables.forEach(el => el.classList.toggle('hide_column-' + col))
         console.log(col)
     }
 </script>
@@ -97,13 +103,27 @@ $gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_co
     </div-->
 </div>
 
-<div class="row">
+<div class="row gridview">
     <div class="col-xs-12">
         <?php Pjax::begin(['id' => 'purchases']) ?>
         <?= GridView::widget([
             'dataProvider' => $purchaseDataProvider,
             'columns' => [
-                'id',
+                [
+                    'attribute' => 'status_id',
+                    'label' => 'Статус',
+                    'content' => function ($data) {
+                        $statuses = Status::find()->asArray()->all();
+                        return Html::dropDownList('status_id',
+                            $data->status_id,
+                            ArrayHelper::map($statuses, 'id', 'name'),
+                            [
+                                'data-id' => $data->id,
+                                'class' => 'input-status'
+                            ]
+                        );
+                    }
+                ],
                 [
                     'attribute' => 'number',
                     'label' => '№',
@@ -178,10 +198,10 @@ $gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_co
 //                      $content .= $data->end_date.'<br>'.time().'<br>'.$remainingTime;
                         return $content;
                     }
-                ],
+                ]
             ],
             'tableOptions' => [
-                'class' => 'table table-striped table-bordered table-gridview'.$gridViewTableClasses
+                'class' => 'table table-striped table-bordered table-gridview' . $gridViewTableClasses
             ],
             'rowOptions' => function ($data) {
                 if ($data->end_date - time() < 0) {

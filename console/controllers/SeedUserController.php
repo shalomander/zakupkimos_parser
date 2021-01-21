@@ -3,9 +3,7 @@
 namespace console\controllers;
 
 use common\models\User;
-use common\models\UserPlan;
 use yii\console\Controller;
-use common\models\Plan;
 
 class SeedUserController extends Controller
 {

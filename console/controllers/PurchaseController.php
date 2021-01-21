@@ -43,14 +43,14 @@ class PurchaseController extends Controller
                 "обл Ленинградская",
             ];
             $newPurchases = [];
-            $timezone=new DateTimeZone('Europe/Moscow');
+            $timezone = new DateTimeZone('Europe/Moscow');
             foreach ($data['items'] as $item) {
                 $exists = PurchaseList::find()->where(['purchase_id' => $item['id']])->exists();
                 $beginDate = explode(' ', $item['beginDate'])[0];
                 $endDate = explode(' ', $item['endDate'])[0];
-                $isOneDay=$beginDate==$endDate;
-                $isNotInRegions=!in_array($item['regionName'], $excludeRegions);
-                if($exists)
+                $isOneDay = $beginDate == $endDate;
+                $isNotInRegions = !in_array($item['regionName'], $excludeRegions);
+                if ($exists)
                     break;
                 if ($item['needId'] and $isOneDay and $isNotInRegions) {
                     print "{$beginDate} - {$endDate}\n";
@@ -91,6 +91,7 @@ class PurchaseController extends Controller
                             $purchase->delivery_place = $itemDetailsArray['deliveryPlace'];
                     }
                     $purchase->is_notified = false;
+                    $purchase->status_id = 1;
                     $purchase->save();
                     $newPurchases[] = $purchase;
                 }
@@ -132,7 +133,8 @@ class PurchaseController extends Controller
         return $detailUrl;
     }
 
-    public function actionRemoveOld($storePeriod=365*86400){
-        PurchaseList::deleteAll(['<=', 'end_date', time()-$storePeriod]);
+    public function actionRemoveOld($storePeriod = 365 * 86400)
+    {
+        PurchaseList::deleteAll(['<=', 'end_date', time() - $storePeriod]);
     }
 }

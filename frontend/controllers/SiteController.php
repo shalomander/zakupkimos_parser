@@ -35,12 +35,12 @@ class SiteController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['login'/*, 'signup'*/],
+                        'actions' => ['login'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['login', 'index', 'logout', 'config'],
+                        'actions' => ['login', 'index', 'logout', 'config', 'status'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -80,12 +80,12 @@ class SiteController extends Controller
     {
         $purchaseDataProvider = new ActiveDataProvider([
             'query' => PurchaseList::find()
-                ->where(['>=', 'begin_date', strtotime('today', time())]),
+                ->where(['>=', 'begin_date', strtotime('-1 year', time())]),
             'pagination' => [
                 'pageSize' => 100,
             ],
         ]);
-        $settings=Settings::getAsArray(['notification_email'=>Yii::$app->user->identity->email]);
+        $settings = Settings::getAsArray(['notification_email' => Yii::$app->user->identity->email]);
         return $this->render('index', ['purchaseDataProvider' => $purchaseDataProvider,
             'settings' => $settings]);
     }
@@ -245,11 +245,19 @@ class SiteController extends Controller
      */
     public function actionConfig()
     {
-        $settings=Yii::$app->request->post();
+        $settings = Yii::$app->request->post();
         unset($settings['_csrf-frontend']);
-        foreach ($settings as $k=>$v){
+        foreach ($settings as $k => $v) {
             Settings::set($k, $v, false);
         }
         return json_encode($settings);
+    }
+
+    public function actionStatus()
+    {
+        $id = Yii::$app->request->post('id');
+        $status_id = Yii::$app->request->post('status_id');
+        if ($id and $status_id)
+            PurchaseList::setStatus($id, $status_id);
     }
 }
