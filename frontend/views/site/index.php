@@ -8,7 +8,7 @@ use yii\widgets\Pjax;
 
 $this->title = 'Активные закупки';
 $gridViewTableClasses='';
-$gridViewTableClasses.=(isset($settings['hide_column-4']) and $settings['hide_column-4'] == 'true')?' hide_column-4':'';
+$gridViewTableClasses.=(isset($settings['hide_column-3']) and $settings['hide_column-3'] == 'true')?' hide_column-3':'';
 $gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_column-6'] == 'true')?' hide_column-6':'';
 ?>
 <script>
