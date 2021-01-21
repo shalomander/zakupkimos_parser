@@ -39,7 +39,7 @@ $gridViewTableClasses.=(isset($settings['hide_column-6']) and $settings['hide_co
         let el = e.target;
         if (el.checkValidity()) {
             let request = new XMLHttpRequest();
-            request.open('POST', '/config', true);
+            request.open('POST', 'config', true);
             let formData = new FormData()
             formData.append('<?= Yii::$app->request->csrfParam; ?>', '<?= Yii::$app->request->csrfToken; ?>')
             if (el.type == "checkbox")
