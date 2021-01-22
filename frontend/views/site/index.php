@@ -88,12 +88,19 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
             Отображать закупки за:
         </div>
         <div>
-            <select name="show_purchases_period" class="form-control input-settings input-period">
-                <option value="-1 day">День</option>
-                <option value="-1 week">Неделя</option>
-                <option value="-1 month">Месяц</option>
-                <option value="-1 year">Год</option>
-            </select>
+            <?= Html::dropDownList('status_id',
+                $settings['show_purchases_period'],
+                [
+                    '-1 day' => 'День',
+                    '-1 week' => 'Неделя',
+                    '-1 month' => 'Месяц',
+                    '-1 year' => 'Год',
+                ],
+                [
+                    'class' => 'form-control input-settings input-period'
+                ]
+            );
+            ?>
         </div>
     </div>
     <div class="col-md-6 form-group ">
