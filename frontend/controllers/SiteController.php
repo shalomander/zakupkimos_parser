@@ -78,14 +78,18 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+
+        $settings = Settings::getAsArray([
+            'notification_email' => Yii::$app->user->identity->email,
+            'show_purchases_period' => '-1 week'
+        ]);
         $purchaseDataProvider = new ActiveDataProvider([
             'query' => PurchaseList::find()
-                ->where(['>=', 'begin_date', strtotime('-1 year', time())]),
+                ->where(['>=', 'begin_date', strtotime($settings['show_purchases_period'], time())]),
             'pagination' => [
                 'pageSize' => 100,
             ],
         ]);
-        $settings = Settings::getAsArray(['notification_email' => Yii::$app->user->identity->email]);
         return $this->render('index', ['purchaseDataProvider' => $purchaseDataProvider,
             'settings' => $settings]);
     }

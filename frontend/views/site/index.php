@@ -21,6 +21,9 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
         document.querySelectorAll('.input-settings').forEach(el => el.addEventListener('change', event => {
             setConfig(event)
         }))
+        document.querySelectorAll('.input-period').forEach(el => el.addEventListener('change', event => {
+            $.pjax.reload({container: '#purchases', async: false});
+        }))
         document.querySelectorAll('.gridview').forEach(el => el.addEventListener('change', event => {
             if (event.target.classList.contains('input-status'))
                 setStatus(event)
@@ -72,18 +75,29 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
         console.log(col)
     }
 </script>
-<div class="row form-inline">
+<div class="row form-inline form-settings">
     <div class="col-md-6 form-group ">
-        <div>
+        <div class="form-label">
             Email для уведомлений:
         </div>
         <div>
             <input name="notification_email" type="email" class="form-control input-settings"
                    id="email1" value="<?= $settings['notification_email'] ?>" required>
         </div>
+        <div class="form-label">
+            Отображать закупки за:
+        </div>
+        <div>
+            <select name="show_purchases_period" class="form-control input-settings input-period">
+                <option value="-1 day">День</option>
+                <option value="-1 week">Неделя</option>
+                <option value="-1 month">Месяц</option>
+                <option value="-1 year">Год</option>
+            </select>
+        </div>
     </div>
     <div class="col-md-6 form-group ">
-        <div>
+        <div class="form-label">
             Скрыть столбцы:
         </div>
         <div>

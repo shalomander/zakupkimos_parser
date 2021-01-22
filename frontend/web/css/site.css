@@ -191,3 +191,11 @@ select.input-status {
 .status-viewed {
     background-color: rgba(0, 255, 0, .3);
 }
+
+.form-label{
+    padding-top: 1rem;
+}
+
+.form-group input:not([type='checkbox']), .form-group select{
+    width: 30% !important;
+}

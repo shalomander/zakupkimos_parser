@@ -26,7 +26,12 @@ class SeedSettingsController extends Controller
 
         $row = new Settings();
         $row->key = 'last_parser_run';
-        $row->value = $beginOfDay = strtotime("today", time());
+        $row->value = strtotime("today", time());
+        $row->save();
+
+        $row = new Settings();
+        $row->key = 'show_purchases_period';
+        $row->value = '1 week';
         $row->save();
     }
 }
