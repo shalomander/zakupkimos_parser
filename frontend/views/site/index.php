@@ -88,7 +88,7 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
             Отображать закупки за:
         </div>
         <div>
-            <?= Html::dropDownList('status_id',
+            <?= Html::dropDownList('show_purchases_period',
                 $settings['show_purchases_period'],
                 [
                     '-1 day' => 'День',
