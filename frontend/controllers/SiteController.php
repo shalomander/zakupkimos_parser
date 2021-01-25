@@ -85,7 +85,9 @@ class SiteController extends Controller
         ]);
         $purchaseDataProvider = new ActiveDataProvider([
             'query' => PurchaseList::find()
-                ->where(['>=', 'begin_date', strtotime($settings['show_purchases_period'], time())]),
+                ->select('*, end_date - UNIX_TIMESTAMP(now()) as remaining_time')
+                ->where(['>=', 'begin_date', strtotime($settings['show_purchases_period'], time())])
+                ->orderBy('SIGN(remaining_time) DESC, abs(remaining_time) asc'),
             'pagination' => [
                 'pageSize' => 100,
             ],
