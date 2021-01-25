@@ -7,7 +7,7 @@ use yii\db\ActiveRecord;
 
 class PurchaseList extends ActiveRecord
 {
-
+    public $rtime, $rsign, $rabs;
     public function rules()
     {
         return [

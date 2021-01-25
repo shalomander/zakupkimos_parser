@@ -85,12 +85,30 @@ class SiteController extends Controller
         ]);
         $purchaseDataProvider = new ActiveDataProvider([
             'query' => PurchaseList::find()
-                ->select('*, end_date - UNIX_TIMESTAMP(now()) as remaining_time')
+                ->select('*,
+                 end_date - UNIX_TIMESTAMP(now()) as rtime,
+                 SIGN(end_date - UNIX_TIMESTAMP(now())) as rsign,
+                 abs(end_date - UNIX_TIMESTAMP(now())) as rabs')
                 ->where(['>=', 'begin_date', strtotime($settings['show_purchases_period'], time())])
-                ->orderBy('SIGN(remaining_time) DESC, abs(remaining_time) asc'),
+                ->orderBy('rsign DESC, rabs ASC'),
             'pagination' => [
                 'pageSize' => 100,
             ],
+            'sort' => [
+                'attributes' => [
+                    'status_id',
+                    'number',
+                    'name',
+                    'purchase_creator_name',
+                    'start_price',
+                    'delivery_place',
+                    'rabs' => [
+                        'asc' => ['rabs' => SORT_ASC],
+                        'desc' => ['rabs' => SORT_DESC],
+                        'default' => SORT_DESC
+                    ]
+                ]
+            ]
         ]);
         return $this->render('index', ['purchaseDataProvider' => $purchaseDataProvider,
             'settings' => $settings]);

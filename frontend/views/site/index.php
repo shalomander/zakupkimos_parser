@@ -215,8 +215,7 @@ $gridViewTableClasses .= (isset($settings['hide_column-6']) and $settings['hide_
                     'label' => 'Адрес поставки',
                 ],
                 [
-                    'attribute' => 'end_date',
-                    'enableSorting' => false,
+                    'attribute' => 'rabs',
                     'label' => 'Время окончания закупки',
                     'content' => function ($data) {
                         $remainingTime = $data->end_date - time();
