@@ -90,7 +90,7 @@ class SiteController extends Controller
                  SIGN(end_date - UNIX_TIMESTAMP(now())) as rsign,
                  abs(end_date - UNIX_TIMESTAMP(now())) as rabs')
                 ->where(['>=', 'begin_date', strtotime($settings['show_purchases_period'], time())])
-                ->orderBy('rsign DESC, rabs ASC'),
+                ->orderBy('rsign DESC'),
             'pagination' => [
                 'pageSize' => 100,
             ],
@@ -106,8 +106,13 @@ class SiteController extends Controller
                         'asc' => ['rabs' => SORT_ASC],
                         'desc' => ['rabs' => SORT_DESC],
                         'default' => SORT_DESC
+                    ],
+                    'rsign' => [
+                        'asc' => ['rsign' => SORT_ASC],
+                        'desc' => ['rsign' => SORT_DESC],
                     ]
-                ]
+                ],
+                'defaultOrder' => ['rabs' => SORT_ASC]
             ]
         ]);
         return $this->render('index', ['purchaseDataProvider' => $purchaseDataProvider,
