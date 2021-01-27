@@ -16,8 +16,8 @@ class PurchaseController extends Controller
         print "running purchase parser...\n";
         Yii::warning("running purchase parser...\n");
         $last_run = Settings::get('last_parser_run');
-        $current_run = time()+3600*3;
-        $datetime = date('d.m.Y%20H:i:s', $last_run-600);
+        $current_run = time() + 3600 * 3;
+        $datetime = date('d.m.Y%2000:00:00', $last_run);
         $ch = curl_init();
 
         $endpointUrl = 'https://old.zakupki.mos.ru/api/Cssp/Purchase/Query?';
@@ -51,12 +51,12 @@ class PurchaseController extends Controller
                 $isNotInRegions = !in_array($item['regionName'], $excludeRegions);
                 if ($exists)
                     continue;
-                if(!is_null($item['needId'])) {
+                if (!is_null($item['needId'])) {
                     $number = $item['needId'];
                     $isNeed = true;
-                }else {
-                    $number=$item['number'];
-                    $isNeed=false;
+                } else {
+                    $number = $item['number'];
+                    $isNeed = false;
                 }
                 Yii::warning("{$number}: is need - {$isNeed}, isOneDay - {$isOneDay}, isNotInRegions - {$isNotInRegions}");
                 Yii::warning("start date = {$beginDate}, end date = {$endDate}\n");
