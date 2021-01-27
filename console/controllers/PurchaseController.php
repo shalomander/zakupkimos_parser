@@ -16,19 +16,17 @@ class PurchaseController extends Controller
         print "running purchase parser...\n";
         Yii::warning("running purchase parser...\n");
         $last_run = Settings::get('last_parser_run');
-        $current_run = time();
+        $current_run = time()+3600*3;
         $datetime = date('d.m.Y%20H:i:s', $last_run);
-        $itemLimit = 70;
         $ch = curl_init();
 
         $endpointUrl = 'https://old.zakupki.mos.ru/api/Cssp/Purchase/Query?';
         $endpointUrl .= 'queryDto={"filter":{"publishDateGreatEqual":"';
-        $endpointUrl .= $datetime; // current datetime
+        $endpointUrl .= $datetime;
         $endpointUrl .= '","auctionSpecificFilter":{"stateIdIn":[19000002]},"needSpecificFilter":{"stateIdIn":[20000002]},';
-        $endpointUrl .= '"tenderSpecificFilter":{"stateIdIn":[5]}},"order":[{"field":"PublishDate","desc":true}],"withCount":true,"take":';
-        $endpointUrl .= $itemLimit; //limit
-        $endpointUrl .= ',"skip":0}';
+        $endpointUrl .= '"tenderSpecificFilter":{"stateIdIn":[5]}},"order":[{"field":"PublishDate","desc":true}],"withCount":true,"skip":0}';
 
+        Yii::warning("trying to get data from {$endpointUrl}\n");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_URL, $endpointUrl);
         $response = curl_exec($ch);
@@ -44,6 +42,7 @@ class PurchaseController extends Controller
             ];
             $newPurchases = [];
             $timezone = new DateTimeZone('Europe/Moscow');
+            Yii::warning(count($data['items']) . " purchases found\n");
             foreach ($data['items'] as $item) {
                 $exists = PurchaseList::find()->where(['purchase_id' => $item['id']])->exists();
                 $beginDate = explode(' ', $item['beginDate'])[0];
@@ -51,8 +50,18 @@ class PurchaseController extends Controller
                 $isOneDay = $beginDate == $endDate;
                 $isNotInRegions = !in_array($item['regionName'], $excludeRegions);
                 if ($exists)
-                    break;
-                if ($item['needId'] and $isOneDay and $isNotInRegions) {
+                    continue;
+                if(!is_null($item['needId'])) {
+                    $number = $item['needId'];
+                    $isNeed = true;
+                }else {
+                    $number=$item['number'];
+                    $isNeed=false;
+                }
+                Yii::warning("{$number}: is need - {$isNeed}, isOneDay - {$isOneDay}, isNotInRegions - {$isNotInRegions}");
+                Yii::warning("start date = {$beginDate}, end date = {$endDate}\n");
+
+                if ($isNeed and $isOneDay and $isNotInRegions) {
                     print "{$beginDate} - {$endDate}\n";
                     $detailUrl = self::getDetailUrl($item);
                     curl_setopt($ch, CURLOPT_URL, $detailUrl);
