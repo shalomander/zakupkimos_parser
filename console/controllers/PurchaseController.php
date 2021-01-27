@@ -17,7 +17,7 @@ class PurchaseController extends Controller
         Yii::warning("running purchase parser...\n");
         $last_run = Settings::get('last_parser_run');
         $current_run = time()+3600*3;
-        $datetime = date('d.m.Y%20H:i:s', $last_run);
+        $datetime = date('d.m.Y%20H:i:s', $last_run-600);
         $ch = curl_init();
 
         $endpointUrl = 'https://old.zakupki.mos.ru/api/Cssp/Purchase/Query?';
